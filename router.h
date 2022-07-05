@@ -32,6 +32,7 @@ public:
         {"tickFreq", "Descript", "1s"},
         {"numPorts", "Descript", "1"},   
         {"verbose_level", "Descript", "1"},
+        {"queueSize", "Descript", "50"},
     )
 
     SST_ELI_DOCUMENT_PORTS(
@@ -45,7 +46,12 @@ private:
 
     std::string clock;
 
-    std::queue<Message> infQueue; 
+    int queueSize;
+    std::queue<Message> msgQueue;
+
+    int limitEpsilon; // Integer duration before the router can send a new limit message. 
+                       // Prevents router from constantly sending limit messages when queue becomes full
+    int limitCount;
 
     float goodput;
     float throughput;

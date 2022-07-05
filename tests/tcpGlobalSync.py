@@ -3,8 +3,8 @@ import sst
 router = sst.Component("Router", "tcpGlobalSync.router")
 router.addParams(
     {
-        "tickFreq": "1s",
-        "numPorts": "2",
+        "tickFreq": "0.5s",
+        "numPorts": "1",
         "verbose_level": "3",
     }
 )
@@ -20,7 +20,7 @@ client_zero.addParams(
 )
 
 
-client_one = sst.Component("Client_1", "tcpGlobalSync.client")
+"""client_one = sst.Component("Client_1", "tcpGlobalSync.client")
 client_one.addParams(
     {
         "tickFreq": "1s",
@@ -28,12 +28,12 @@ client_one.addParams(
         "node_id": "1",
         "verbose_level": "4",
     }
-)
+)"""
 
 sst.Link("Flow_One").connect(
     (client_zero, "commPort", "1s"), (router, "commPort0", "1s")
 )
 
-sst.Link("Flow_Two").connect(
+"""sst.Link("Flow_Two").connect(
     (client_one, "commPort", "1s"), (router, "commPort1", "1s")
-)
+)"""

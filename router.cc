@@ -35,14 +35,17 @@ router::~router() {
 void router::setup() {
     goodput = 0;
     throughput = 0;
+    limitCount = 0;
+    queueSize = 50;
+    limitEpsilon = 25;
 }
 
 bool router::tick( SST::Cycle_t currentCycle ) {
     output.verbose(CALL_INFO, 2, 0, "Goodput: %f\nThroughput: %f\n", goodput, throughput);
-
+    limitCount++;
     // Potential statistics
-    std::cout << infQueue.size() << std::endl;
-    std::cout << goodput / throughput << std::endl;
+    //std::cout << msgQueue.size() << std::endl;
+    //std::cout << goodput / throughput << std::endl;
 
     if (currentCycle == 100) {
         primaryComponentOKToEndSim();
@@ -50,8 +53,8 @@ bool router::tick( SST::Cycle_t currentCycle ) {
     }
     //output.verbose(CALL_INFO, 1, 0, "Testing...\n"); 
 
-    if (!infQueue.empty()) {
-        Message msg = infQueue.front(); // Grab message at front
+    if (!msgQueue.empty()) {
+        Message msg = msgQueue.front(); // Grab message at front
 
         msg.type = ACK; // Change msg to ack
         commPort[msg.node]->send(new MessageEvent(msg)); // Send ack back to node
@@ -64,7 +67,7 @@ bool router::tick( SST::Cycle_t currentCycle ) {
             throughput--;
         }
 
-        infQueue.pop();
+        msgQueue.pop();
     }
 
     return(false);
@@ -84,7 +87,18 @@ void router::commHandler(SST::Event *ev, int port) {
                     throughput++;
                 }
 
-                infQueue.push(me->msg); // Push message onto queue.
+
+                if (msgQueue.size() + 1 > queueSize && limitEpsilon < limitCount) {
+                    // Send out msgs to all clients to slow down window size
+                    Message limitMsg = { LIMIT, NEW, 0, 0 };
+                    output.verbose(CALL_INFO, 3, 0, "Sending Limit Messages Out\n");
+                    for (int i = 0; i < numPorts; ++i) {
+                        commPort[i]->send(new MessageEvent(limitMsg));
+                    }
+                    // drop message.
+                } else {
+                    msgQueue.push(me->msg); // Push message onto queue.
+                } 
                 break;
 
             case ACK:

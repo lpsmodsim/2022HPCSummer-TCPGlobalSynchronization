@@ -1,3 +1,9 @@
+/**
+ * Client component for a simple reliable network simulation.
+ * 
+ * The client sends frames and retransmissions to a router component.
+ */
+
 #include <sst/core/sst_config.h>
 #include "client.h"
 
@@ -8,7 +14,7 @@ client::client( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id
     timeout = params.find<int64_t>("timeout", 1);
     node_id = params.find<int64_t>("node_id", 1);
 
-    window_size = 5;
+    window_size = 1;
    
     output.init(getName() + "->", verbose_level, 0, SST::Output::STDOUT ); 
 
@@ -132,8 +138,12 @@ void client::commHandler(SST::Event *ev) {
                         timer_start = 0;
                         send_state = NEW;
                         client_state = IDLE;
+                        window_size++;
                     }
                 }   
+                break;
+            case LIMIT:
+                window_size = 1;
                 break;
         }
     }

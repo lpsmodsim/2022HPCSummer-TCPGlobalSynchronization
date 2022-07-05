@@ -5,6 +5,7 @@
 
 enum MessageType {
     FRAME,
+    LIMIT,
     ACK,
 };
 
