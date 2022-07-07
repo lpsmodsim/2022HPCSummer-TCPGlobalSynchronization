@@ -14,7 +14,7 @@ client::client( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id
     timeout = params.find<int64_t>("timeout", 1);
     node_id = params.find<int64_t>("node_id", 1);
 
-    window_size = 1;
+    window_size = 5;
    
     output.init(getName() + "->", verbose_level, 0, SST::Output::STDOUT ); 
 
@@ -143,7 +143,11 @@ void client::commHandler(SST::Event *ev) {
                 }   
                 break;
             case LIMIT:
-                window_size = 1;
+                if (window_size == 1) {
+                    window_size = 1;
+                } else {
+                    window_size = window_size / 2;
+                }
                 break;
         }
     }

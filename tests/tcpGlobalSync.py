@@ -3,9 +3,10 @@ import sst
 router = sst.Component("Router", "tcpGlobalSync.router")
 router.addParams(
     {
-        "tickFreq": "0.5s",
+        "tickFreq": "2s",
         "numPorts": "1",
         "verbose_level": "3",
+        "queueSize": "3",
     }
 )
 

@@ -6,6 +6,7 @@ router::router( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id
     clock = params.find<std::string>("tickFreq", "1s");
     verbose_level = params.find<int64_t>("verbose_level", 1);
     numPorts = params.find<int64_t>("numPorts", 1); 
+    queueSize = params.find<int64_t>("queueSize", 50);
 
     output.init(getName() + "->", verbose_level, 0, SST::Output::STDOUT); 
 
@@ -36,13 +37,14 @@ void router::setup() {
     goodput = 0;
     throughput = 0;
     limitCount = 0;
-    queueSize = 50;
     limitEpsilon = 25;
 }
 
 bool router::tick( SST::Cycle_t currentCycle ) {
     output.verbose(CALL_INFO, 2, 0, "Goodput: %f\nThroughput: %f\n", goodput, throughput);
     limitCount++;
+    output.verbose(CALL_INFO, 2, 0, "Queue Size: %d\n", msgQueue.size());
+
     // Potential statistics
     //std::cout << msgQueue.size() << std::endl;
     //std::cout << goodput / throughput << std::endl;
@@ -88,13 +90,14 @@ void router::commHandler(SST::Event *ev, int port) {
                 }
 
 
-                if (msgQueue.size() + 1 > queueSize && limitEpsilon < limitCount) {
+                if (msgQueue.size() + 1 > queueSize) {
                     // Send out msgs to all clients to slow down window size
                     Message limitMsg = { LIMIT, NEW, 0, 0 };
                     output.verbose(CALL_INFO, 3, 0, "Sending Limit Messages Out\n");
-                    for (int i = 0; i < numPorts; ++i) {
+                    commPort[me->msg.node]->send(new MessageEvent{limitMsg});
+                    /**for (int i = 0; i < numPorts; ++i) {
                         commPort[i]->send(new MessageEvent(limitMsg));
-                    }
+                    }*/
                     // drop message.
                 } else {
                     msgQueue.push(me->msg); // Push message onto queue.
