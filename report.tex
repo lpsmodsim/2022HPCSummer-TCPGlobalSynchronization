@@ -26,13 +26,13 @@
 
     % https://stackoverflow.com/a/3408428/1164295
     \begin{minipage}[h]{\textwidth}
-        \title{2022 Future Computing Summer Internship Project:\\(Mapping Congestion Collapse to the SST model)}
+        \title{2022 Future Computing Summer Internship Project:\\(Mapping TCP Global Synchronization to the SST model)}
         \author{Nicholas Schantz\footnote{nickjohnschantz@gmail.com}\ , 
         anotherfirst\footnote{anemail@domain.com}}
         \date{\today}
             \maketitle
         \begin{abstract}
-            Congestion Collapse is a issue involving reliable network protocols that send large amounts of retransmission clogging a link with duplicate data. This leads the network in a state where useful throughput has vastly decreased or does not exist over time. SST will be used to model the problem and parameterized so that the problem can be simulated and metrics can be collected which identify if congestion collapse exist. We determine that the ratio of goodput and throughput in the link can assist in identifying the existing of the problem. Furthermore, we determine that a link's send queue depth and ratio of first packets to duplicate packets directly measure the existence of congestion collapse.
+            TCP Global Synchronization is a networking problem in which a burst of traffic in a network causes multiple clients to drop packets and limit their transmission rates. The clients begin to increase their transmission rates consecutively leading to more packet loss and transmission limiting, creating a loop of this activity. SST is used to model this activity and determine metrics that can determine if this problem exist in a simulation. A key metric found is to look in a window of activity when packet loss occurs and count how many clients have reduced their transmission rates.
         \end{abstract}
     \end{minipage}
 
@@ -43,52 +43,41 @@
 
 \section{Project Description} % what problem is being addressed? 
 
-The challenge addressed by this work is to map the networking problem 'Congestion Collapse' to the SST model. The problem is simulated to identify mathematical conditions that cause the problem. This information is used to develop metrics to identify that the problem has occurred in generalized systems.
+The challenge addressed by this work is to map the networking problem 'TCP Global Synchronization' to the SST model. The problem is studied to understand the mathematic conditions that create this problem. This information is used to create a SST model and simulate it to identify metrics to detect that the problem has occurred in simulated systems.
 
 \section{Motivation} % Why does this work matter? Who cares? If you're successful, what difference does it make?
 
-Identifying the metrics for detecting congestion collapse will be vital for developing distributed systems that can avoid congestion collapse from occurring during communication. Furthermore, the metrics answer the question as to why the problem has occurred in the system. To add, the SST models written are resources that other users can use to learn and utilize SST's discrete event simulator.
+Identifying the metrics for detecting TCP Global Synchronization will be vital for developing distributed systems that can avoid congestion collapse from occurring during communication. Furthermore, the metrics answer the question as to why the problem has occurred in the system. To add, the SST models written are resources that other users can use to learn and utilize SST's discrete event simulator.
 
 \section{Prior work} % what does this build on?
 
-Research for determining metrics for the detection of congestion collapse was not found. However, research on the conditions that trigger this problem are actively researched. See \cite{https://www.researchgate.net/publication/220428692_Network_Border_Patrol_Preventing_Congestion_Collapse_and_Promoting_Fairness_in_the_Internet}
+
 
 \section{How to do the thing}
 
 The software developed to respond to this challenge was run on one laptop.
-The software is available on (https://github.com/lpsmodsim/2022HPCSummer-CongestiveCollapse)
-
-\section{Progress}
-
-\indent\indent Three SST models were made in the attempt to collect useful data to determine metrics which identify the existence of the problem. The first model was to map a cargo shipping company to the SST model, this model quickly became confusing because of failed attempts at combining TCP protocol to a real world example. For instance, correctly implementing sliding window when a node sends multiple messages per cycle became a problem due to data racing when multiple senders were added into the composition. \newline
-\indent The second model attempted to simplify the simulation by limiting the simulation to a sender node and a receiver node. The receiver has an infinite queue and sender will send a variable amount of packets per cycle. The issue with this model was the usage of an infinite queue which limited packet loss in the simulation. However, packet loss needs to be accounted for as retransmissions can be duplicate packets but also first packets which were dropped previously and are still goodput. Furthermore, we will need to parameterize queue depth for metrics. \newline
-\indent In this case, a third iteration of the simulation is being written which attempted to be a simple implementation of a reliable network protocol. Changes to this simulation was to remove the infinite queue which allows queue depth to be parameterized for data gathering. In this case the idea of packet loss was also added which would need to be accounted for since a resent packet loss could still be goodput.\newline
-\indent The simulator is used to purposefully cause congestion collapse by having n clients send a set of frames at a rate that the link will be unable to process before the client's timeout and retransmit their data.
+The software is available on (https://github.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization)
 
 \section{Result} % conclusion/summary
 
-To determine if congestion collapse exist in a network. Three metrics were determined:\newline
-\indent Calculating a ratio between the useful throughput and the total throughput of a link gives insight to how many duplicate or corrupted packets have passed through a link. However, if this ratio is low due to corrupted packets, that does not indicate congestion collapse. In this case queue depth is measured and if it is largely being filled with duplicate packets rather than new packets, then we can declare that the network is being flooded with retransmissions. In this case these metrics can identify that congestion collapse exist in the network.\newline
-\indent An example of the problem is simulated and gathered data is shown below. In this SST simulation, a node is sending packets at 10 times the rate that a receiver node can process them at. In this case the receiver node's queue fills quickly and the receiver is unable to send acknowledgments under the sender's timeout time. Retransmissions are sent which cause more packets to fill the queue and the useful throughput exponentially decays to zero in a short span of time. \newline\newline The following graphs will be \underline{changed} when the third model mentioned above is complete. This new model is being developed to also work on the problem TCP Global Synchronization as well. \newline
+Potential metrics included the following:\newline
+	$\bullet$ Average aggregate link utilization \newline
+	$\bullet$ Queue size fluctuation \newline
+	$\bullet$ Time in which clients drop \newline\newline
 
-\begin{figure}[H]
-\includegraphics[scale=0.5]{throughput}
-\centering
-\caption{Ratio of goodput to throughput over a span of 100 seconds}
-\end{figure}
-
-\begin{figure}[H]
-	\includegraphics[scale=0.5]{newpackets}
+	Average aggregate link utilization was chosen as a unique pattern forms in the link utilization when global synchronization happens. Due to clients syncing and lowering transmission rates all at once, the link can rest for a bit and clear up its queue and will process messages under its capacity, lowering link utilization. As transmission rates increase, link utilization will grow to 100\% and this cycle will repeat when packet loss occurs again.\newline
+	
+	\begin{figure}[H]
+	\caption{SST Model collected data of aggregate link utilization over 800 seconds.}
 	\centering
-	\caption{Amount of new packets entering the queue each second for 100 second}
-\end{figure}
-
-\begin{figure}[H]
-	\includegraphics[scale=0.5]{queuedepth}
-	\centering
-	\caption{Infinite queue which increases over time. This queue will be finite in the next model}
-\end{figure}
-
+	\includegraphics{linkutil}
+	\end{figure}
+	
+	However, this metric was thrown out when I researched around RED which is a dropping mechanism in reliable networks that attempts to avoid global synchronization. Average aggregate link utilization under this dropping mechanism appears to be similar to tail drop except the average is closer to peak utilization. In this case using this metric may alert on false positives. \newline
+	
+	The queue size fluctuates quite often during global synchronization as it will empty out more often during lower link utilization while it will grow during peak link utilization. I thought it would be possible to measure in a window the time span in which the queue size is emptied out and growing to max capacity and seeing if that span of time matches the duration between two transmission rate limits of a client.
+	(Potential picture)
+	However, during periods of low latency and high link utilization, the queue will be fluctuating drastically. (Explain). Therefore this metric was tossed out.
 
 \begin{thebibliography}{9}
 \bibitem{texbook}
