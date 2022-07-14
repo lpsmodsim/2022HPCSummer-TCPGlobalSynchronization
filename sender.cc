@@ -61,7 +61,7 @@ bool sender::tick( SST::Cycle_t currentCycle ) {
         for (int i = 0; i < packets_to_send; i++) {
             output.verbose(CALL_INFO, 3, 0, "Sending Packet #%d\n", i);
             sendPacket(i, send_delay); 
-            send_delay += i;
+            //send_delay += i;
         }
     } else {
         // output 0 as curr send rate for statistics
