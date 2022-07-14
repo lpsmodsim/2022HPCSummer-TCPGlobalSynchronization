@@ -32,12 +32,12 @@
         \date{\today}
             \maketitle
         \begin{abstract}
-            TCP Global Synchronization is a networking problem in which a burst of traffic in a network causes multiple clients to drop packets and limit their transmission rates. The clients begin to increase their transmission rates consecutively leading to more packet loss and transmission limiting, creating a loop of this activity. SST is used to model this activity and determine metrics that can determine if this problem exist in a simulation. A key metric found is to look in a window of activity when packet loss occurs and count how many clients have reduced their transmission rates.
+            TCP Global Synchronization is a networking problem in which a burst of traffic in a network causes multiple clients to drop packets and limit their transmission rates. The clients begin to increase their transmission rates consecutively leading to more packet loss and transmission limiting, creating a loop of this activity. SST is used to model this activity and find metrics that can determine if this problem exist in a simulation. A key metric found is to look in a window of activity when packet loss occurs and measure how many clients have reduced their transmission rates.
         \end{abstract}
     \end{minipage}
 
 \ \\
-% see https://en.wikipedia.org/wiki/George_H._Heilmeier#Heilmeier's_Catechism
+
 
 %\maketitle
 
@@ -47,11 +47,10 @@ The challenge addressed by this work is to map the networking problem 'TCP Globa
 
 \section{Motivation} % Why does this work matter? Who cares? If you're successful, what difference does it make?
 
-Identifying the metrics for detecting TCP Global Synchronization will be vital for developing distributed systems that can avoid congestion collapse from occurring during communication. Furthermore, the metrics answer the question as to why the problem has occurred in the system. To add, the SST models written are resources that other users can use to learn and utilize SST's discrete event simulator.
+Identifying the metrics for detecting TCP Global Synchronization will be vital for developing distributed systems that can avoid congestion collapse from occurring during communication. The metrics allow for these problems to be detected when simulating large scale distributed systems, to prevent the problem from occurring when the real distributed system is put into production. To add, the SST models written are resources that other users can use to learn and utilize SST's discrete event simulator.
 
 \section{Prior work} % what does this build on?
-
-
+The following research does not involve discovering metrics that can detect this problems existence in simulation; however, it was useful in understanding the problem and how different packet dropping policies create or reduce global synchronization. \cite{Bashi2017}
 
 \section{How to do the thing}
 
@@ -60,12 +59,12 @@ The software is available on (https://github.com/lpsmodsim/2022HPCSummer-TCPGlob
 
 \section{Result} % conclusion/summary
 
-Potential metrics included the following:\newline
+Potential metrics include the following:\newline
 	$\bullet$ Average aggregate link utilization compared to peak aggregate link utilization \newline
 	$\bullet$ Queue size fluctuation \newline
 	$\bullet$ Time in which clients drop \newline\newline
 
-	Average aggregate link utilization was chosen as a unique pattern forms in the link utilization when global synchronization happens. Due to clients syncing and lowering transmission rates all at once, the link can rest for a bit and clear up its queue and will process messages under its capacity, lowering link utilization. As transmission rates increase, link utilization will grow to 100\% and this cycle will repeat when packet loss occurs again.\newline
+	Average aggregate link utilization was chosen as a unique pattern forms when global synchronization occurs. Due to clients syncing and lowering transmission rates all at once, the link can rest for a bit and clear up its queue and will process messages under its capacity, lowering link utilization. As transmission rates increase, link utilization will grow to 100\% and this cycle will repeat when packet loss occurs again.\newline
 	
 	\begin{figure}[H]
 	\centering
@@ -75,16 +74,16 @@ Potential metrics included the following:\newline
 	
 	\indent However, this metric was thrown out when I researched RED (Random Early Detection) which is a packet dropping policy in reliable networks that attempts to avoid global synchronization. Average aggregate link utilization under this dropping mechanism appears to be similar to tail drop except the average is closer to peak utilization. In this case using this metric may alert on false positives since its based on measuring where the mean utilization is compared to the peak utilization. \newline
 	
-																			\{ Image of RED with its average link utilization \}\newline
+																			\{ Add image of RED with its average link utilization \}\newline
 	
-	The queue size fluctuates quite often during global synchronization as it will empty out more often during lower link utilization while it will grow during peak link utilization. I thought it would be possible to measure in a window the time span in which the queue size is emptied out and growing to max capacity and seeing if that span of time matches the duration between two transmission rate limits of a client.\newline
+	The queue size fluctuates quite often during global synchronization as it will empty out more often during lower link utilization and it will grow during peak link utilization. I thought it would be possible to measure the time span in which the queue size is emptied out and growing to max capacity, to determine if that span of time matches the duration between multiple transmission rate limits of a client.\newline
 	(Potential picture)\newline
 	
 	However, during periods of low latency and high link utilization, the queue will be fluctuating drastically. This is because the link is in a stable state where it is clearing its queue as it fill. Therefore this metric could produce false positives and was tossed out.\newline
 	
-	Measuring the number of clients that limit their transmission rate in a window of time appears to be the most accurate and precise measurement for detecting this problem. Global Synchronization occurs because the clients are synchronized, measuring the times they limit transmissions can determine if they are showing synchronous behavior.\newline
+	Measuring the number of clients that limit their transmission rate in a window of time appears to be the most accurate and precise measurement for detecting this problem. Global Synchronization occurs because the clients are synchronized, therefore measuring the times they limit transmissions can determine if they are showing synchronous behavior.\newline
 																	
-	To measure this behavior, a node will monitor the clients connected to the link. When the monitor node detects that a client is limiting its transmission rate, the monitor will being sampling input for a window of time. If all nodes limit their transmission rate in the window, the possibility of global synchronization occurring increases and a (arbitrary (uh oh)) percentage of chance is added to a variable keeping track of the metric. To determine a high chance that this behavior is occurring, the monitor will sample multiple times when it detects a client limiting its transmission rate.\newline
+	To measure this behavior, a node will monitor the clients connected to the link. When the monitoring node detects that a client is limiting its transmission rate, the monitor will begin sampling input for a window of time. If all nodes limit their transmission rate in the window, the possibility of global synchronization occurring increases at a (arbitrary (uh oh)) percentage. To determine a high chance that this behavior is occurring, the monitor will sample multiple times when it detects a client limiting its transmission rate.\newline
 	This metric is demonstrated on three simulations which simulate three different scenarios of network traffic.\newline
 	
 	The first simulation is of three clients that send at a maximum rate that is under the links capacity. The link's queue will not fill so packet loss will not occur, and clients will not limit their transmission rates.\newline
@@ -100,9 +99,9 @@ Potential metrics included the following:\newline
 		\caption{Metric detecting the existence of the problem in the simulation.}
 	\end{figure}
 	
-																			\{ Figures of network traffic with random send delays \}\newline
+																			\{ Add figures of network traffic with random send delays \}\newline
 																			
-	The third simulation models two clients sending packets to a link a rate in which the queue does not fill up so packet loss does not occur. A third client is introduced and disrupts this by sending packets which causes the queue to fill and packets to be dropped. All clients send packages simultaneously so they all encounter packet loss and limit their rates at about the same time. This creates the problem of global synchronization as they attempt to increase their transmission rates over time.\newline
+	The third simulation models two clients sending packets to a link at a rate in which the queue does not fill up so packet loss can not occur. A third client is introduced and disrupts this by sending packets which causes the queue to fill and packets to be dropped. All clients send packages simultaneously so they all encounter packet loss and limit their rates between a small period of time. This creates the problem of global synchronization as they attempt to increase their transmission rates over time which leads to more packet loss and rate limiting.\newline
 	\begin{figure}[H]
 		\centering
 		\includegraphics[scale=0.5]{bad-rate}
@@ -115,12 +114,7 @@ Potential metrics included the following:\newline
 		\caption{Metric detecting the existence of the problem in the simulation.}
 	\end{figure}
 
-\begin{thebibliography}{9}
-\bibitem{texbook}
-ADD BIB FILE
-
-\bibitem{lamport94}
-ADD BIB FILE
-\end{thebibliography}
+\bibliographystyle{plain}
+\bibliography{biblio}
 
 \end{document}
