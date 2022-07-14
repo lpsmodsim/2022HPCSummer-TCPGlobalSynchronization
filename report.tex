@@ -57,6 +57,30 @@ The following research does not involve discovering metrics that can detect this
 The software developed to respond to this challenge was run on one laptop.
 The software is available on (https://github.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization)
 
+\section{SST Model}
+
+The model is a simplified version of a reliable network protocol with a tail drop queue management policy. It makes the following assumptions:\newline
+
+$\bullet$ Sender components use the same protocol. They limit their transmission rates to the same value.
+
+$\bullet$ Transmission rate limiting occurs immediately after a sender is notified that its packet was dropped.
+
+$\bullet$ Senders increase their transmission rate's linearly after each tick.\newline
+
+The model involves a receiver component that has \textit{n} ports which connect to \textit{n} sender components. The sender components will send packets to the receiver's FIFO queue, and the receiver will process a set number of packets in the queue per tick. 
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.5]{model}
+	\caption{Connection between 3 sender components and 1 receiver component.}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.5]{makefile}
+	\caption{Visualization of Makefile}
+\end{figure}
+
 \section{Result} % conclusion/summary
 
 Potential metrics include the following:\newline
@@ -90,16 +114,16 @@ Potential metrics include the following:\newline
 	\begin{figure}[H]
 		\centering
 		\includegraphics[scale=0.55]{good-rate}
-		\caption{Transmission rates of the three senders over time.}
+		\caption{Transmission rates of the three senders. No rate limits occur so global synchronization does not occur.}
 	\end{figure}
 
 	\begin{figure}[H]
 		\centering
 		\includegraphics[scale=0.55]{good-metric}
-		\caption{Metric detecting the existence of the problem in the simulation.}
+		\caption{Metric does not detect the existence of global synchronization in the simulation.}
 	\end{figure}
 	
-																			\{ Add figures of network traffic with random send delays \}\newline
+																			\{ Add second simulation and figures of network traffic with random send delays \}\newline
 																			
 	The third simulation models two clients sending packets to a link at a rate in which the queue does not fill up so packet loss can not occur. A third client is introduced and disrupts this by sending packets which causes the queue to fill and packets to be dropped. All clients send packages simultaneously so they all encounter packet loss and limit their rates between a small period of time. This creates the problem of global synchronization as they attempt to increase their transmission rates over time which leads to more packet loss and rate limiting.\newline
 	\begin{figure}[H]
@@ -113,6 +137,9 @@ Potential metrics include the following:\newline
 		\includegraphics[scale=0.5]{bad-metric}
 		\caption{Metric detecting the existence of the problem in the simulation.}
 	\end{figure}
+
+\section{Future Work}
+Fill out(?)
 
 \bibliographystyle{plain}
 \bibliography{biblio}

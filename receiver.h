@@ -30,7 +30,7 @@ public:
 
     // Parameter Name, Description, Default Value
     SST_ELI_DOCUMENT_PARAMS(
-        {"tickFreq", "Frequency object updates at", "1s"},
+        {"tickFreq", "Frequency component updates at", "1s"},
         {"process_rate", "Number of packets that are process per cycle", "10"},
         {"queue_size", "Size of queue", "50"},
         {"verbose_level", "Verbosity level for console output", "1"},

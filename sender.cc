@@ -6,7 +6,7 @@
  * @brief Constructs a new sender component for the SST composition.
  * 
  * @param id Component's id for the SST simulator.
- * @param params Used to grab parameters from python driver file.
+ * @param params Used to grab parameters from the python driver file.
  */
 sender::sender( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id) {
 
@@ -41,7 +41,7 @@ sender::~sender() {
 }
 
 void sender::finish() {
-    /**for (int i = 0; i < 600; i++) {
+    /**for (int i = 0; i < 300; i++) {
         std::cout << send_rate_data[i] << std::endl;
     }*/
     /**for (int i = 0; i < drop_counter; i++) {
@@ -52,7 +52,8 @@ void sender::finish() {
 }
 
 /**
- * @brief 
+ * @brief Called every time the sender ticks which is defined by the component's clock frequency.
+ *        Contains the action(s) of the component on each tick.
  * 
  * @param currentCycle Sender's current tick cycle.
  * @return true  Sender is finished and will stop updating.
@@ -83,15 +84,16 @@ bool sender::tick( SST::Cycle_t currentCycle ) {
         send_rate_data[counter] = 0;
         counter++;
     }
-
     send_delay = 0;
     return(false);
 }
 
 /**
- * @brief 
+ * @brief Receives messages that packets were loss and the client will limit its
+ *        transmission rate in response. It will also send a message to notify
+ *        the receiver that rates were limited so the receiver can collect data.
  * 
- * @param ev 
+ * @param ev Event received over connected link.
  */
 void sender::eventHandler(SST::Event *ev) {
     PacketEvent *pe = dynamic_cast<PacketEvent*>(ev);
@@ -107,7 +109,6 @@ void sender::eventHandler(SST::Event *ev) {
                 
                 port->send(new PacketEvent(pe->pack));
                 // Start delay?
-
                 // Statistic when node dropped a packet.
                 //^^^std::cout << node_id << ":" << getCurrentSimTimeMilli() << ":" << 1 << std::endl;
                 //^^^std::cout << getCurrentSimTimeMilli() << std::endl;

@@ -25,7 +25,7 @@ public:
 
     // Parameter Name, Description, Default Value
     SST_ELI_DOCUMENT_PARAMS(
-        {"tickFreq", "Frequency object updates at", "1s"},
+        {"tickFreq", "Frequency component updates at", "1s"},
         {"low_send_rate", "Lower limit of transmission rate", "10"},
         {"max_send_rate", "Max limit of transmission rate", "100"},
         {"verbose_level", "Verbosity level of console output", "1"},
@@ -46,7 +46,7 @@ private:
     void finish(); 
     inline void sendPacket(int id, int delay);  // Constructs and sends a packet via the port.
 
-    int send_rate_data[600];
+    int send_rate_data[300];
     int counter = 0;
     int drop_counter = 0;
     int rate_drop[1000];

@@ -3,10 +3,10 @@
 #include "receiver.h"
 
 /**
- * @brief Construct a new receiver::receiver object
+ * @brief Constructs a new receiver component for the SST composition.
  * 
- * @param id 
- * @param params 
+ * @param id Component's id for the SST simulator.
+ * @param params Used to grab parameters from the python driver file.
  */
 receiver::receiver( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id) {
 
@@ -36,9 +36,10 @@ receiver::receiver( SST::ComponentId_t id, SST::Params& params ) : SST::Componen
     packets_processed = 0;
     link_utilization = 0;
 
-    // Ports
+    // Pointer to a variable number of port pointers.
     port = new SST::Link*[num_nodes];
 
+    // Configure all ports to a link with a different component.
     for (int i = 0; i < num_nodes; ++i) {
         std::string strport = "port" + std::to_string(i);
         port[i] = configureLink(strport, new SST::Event::Handler<receiver>(this, &receiver::eventHandler));
@@ -79,13 +80,12 @@ bool receiver::tick( SST::Cycle_t currentCycle ) {
     //^^^std::cout << link_utilization * 100 << std::endl; 
     //^^^std::cout << globsync_detect << std::endl;
 
+    if (globsync_detect) {
+        globsync_detect = 0;
+    }
+
     if (sampling_status == true && (getCurrentSimTimeMilli() >= sampling_start_time + window_size)) {
         output.verbose(CALL_INFO, 2, 0, "Ending Sampling^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
-        if (already_sampled == false) {
-            if (globsync_detect != 0) {
-                globsync_detect -= 0.25;
-            } 
-        } 
         already_sampled = false;
         sampling_status = false; 
         sampling_start_time = 0;
@@ -95,7 +95,7 @@ bool receiver::tick( SST::Cycle_t currentCycle ) {
         }
     }
 
-    if (currentCycle == 600) {
+    if (currentCycle == 300) {
         primaryComponentOKToEndSim();
         return(true);
     }
@@ -107,8 +107,7 @@ bool receiver::tick( SST::Cycle_t currentCycle ) {
             if (msgQueue.empty()) {
                 break; // If the queue becomes empty during processing, break out.
             }
-        packets_processed++;
-        
+        packets_processed++; //  
         msgQueue.pop(); // "Process" the packet and remove it from queue.
         }
     }
@@ -122,7 +121,7 @@ bool receiver::tick( SST::Cycle_t currentCycle ) {
 /**
  * @brief 
  * 
- * @param ev 
+ * @param ev Event received over connected link.
  */
 void receiver::eventHandler(SST::Event *ev) {
     PacketEvent *pe = dynamic_cast<PacketEvent*>(ev);
@@ -140,7 +139,6 @@ void receiver::eventHandler(SST::Event *ev) {
 
                     // Packet loss occurs
                 
-                     
                     // If dropped packet from previous tracked node_id, ignore
 
                     // If dropped packet from a new tracked node_id, increase chance of global sync occuring
@@ -153,7 +151,6 @@ void receiver::eventHandler(SST::Event *ev) {
                 break;
             case LIMIT:
                 // Receives message that rates are limited, 
-
                 if (sampling_status == false && already_sampled == false) {
                     output.verbose(CALL_INFO, 2, 0, "Started Sampling----------------------------------------------------------------------------\n");
                     sampling_start_time = getCurrentSimTimeMilli(); // Begin Window of Time
@@ -168,9 +165,7 @@ void receiver::eventHandler(SST::Event *ev) {
                     nodes_limited++; 
                     if (nodes_limited == num_nodes) {
                         output.verbose(CALL_INFO, 2, 0, "Ending Sampling-----------------------------------------\n");
-                        if (globsync_detect < 1) {
-                            globsync_detect += 0.25; 
-                        } 
+                        globsync_detect = 1; 
                         already_sampled = true; 
                         nodes_limited = 0;
                         for (int i = 0; i < num_nodes; i++) {
