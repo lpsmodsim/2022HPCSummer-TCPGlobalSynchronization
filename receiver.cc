@@ -2,6 +2,12 @@
 #include <sst/core/simulation.h>
 #include "receiver.h"
 
+/**
+ * @brief Construct a new receiver::receiver object
+ * 
+ * @param id 
+ * @param params 
+ */
 receiver::receiver( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id) {
 
     // Parameters
@@ -55,6 +61,13 @@ void receiver::setup() {
     tracked_nodes[2] = 0;
 }
 
+/**
+ * @brief 
+ * 
+ * @param currentCycle 
+ * @return true 
+ * @return false 
+ */
 bool receiver::tick( SST::Cycle_t currentCycle ) {
     output.verbose(CALL_INFO, 2, 0, "SimTime: %ld\n", getCurrentSimTime());
     output.verbose(CALL_INFO, 2, 0, "Queue Size: %ld\n", msgQueue.size());
@@ -106,6 +119,11 @@ bool receiver::tick( SST::Cycle_t currentCycle ) {
     return(false);
 }
 
+/**
+ * @brief 
+ * 
+ * @param ev 
+ */
 void receiver::eventHandler(SST::Event *ev) {
     PacketEvent *pe = dynamic_cast<PacketEvent*>(ev);
     if (pe != NULL) {
@@ -164,5 +182,5 @@ void receiver::eventHandler(SST::Event *ev) {
                 break;
         }
     }
-    delete ev;
+    delete ev;  // Delete event to prevent memory leaks.
 }

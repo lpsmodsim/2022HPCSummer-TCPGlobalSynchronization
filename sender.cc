@@ -2,7 +2,12 @@
 #include <sst/core/simulation.h>
 #include "sender.h"
 
-
+/**
+ * @brief Constructs a new sender component for the SST composition.
+ * 
+ * @param id Component's id for the SST simulator.
+ * @param params Used to grab parameters from python driver file.
+ */
 sender::sender( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id) {
 
     // Parameters
@@ -21,7 +26,10 @@ sender::sender( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id
 
     output.init(getName() + "->", verbose_level, 0, SST::Output::STDOUT);
  
+    // Clock
     registerClock(clock, new SST::Clock::Handler<sender>(this, &sender::tick));
+
+    // Port
     port = configureLink("port", new SST::Event::Handler<sender>(this, &sender::eventHandler));
     if (!port) {
         output.fatal(CALL_INFO, -1, "Failed to configure port 'port'\n");
@@ -43,6 +51,13 @@ void sender::finish() {
     
 }
 
+/**
+ * @brief 
+ * 
+ * @param currentCycle Sender's current tick cycle.
+ * @return true  Sender is finished and will stop updating.
+ * @return false Sender is not finished and will continue to update.
+ */
 bool sender::tick( SST::Cycle_t currentCycle ) { 
     if (currentCycle >= starting_cycle) {
         if (curr_send_rate < max_send_rate) {
@@ -52,7 +67,6 @@ bool sender::tick( SST::Cycle_t currentCycle ) {
         output.verbose(CALL_INFO, 2, 0, "Sending %d\n", curr_send_rate);
 
         // Statistic Info
-        //^^^std::cout << node_id << ":" << curr_send_rate << std::endl; 
         send_rate_data[counter] = curr_send_rate;
         counter++;
 
@@ -61,7 +75,7 @@ bool sender::tick( SST::Cycle_t currentCycle ) {
         for (int i = 0; i < packets_to_send; i++) {
             output.verbose(CALL_INFO, 3, 0, "Sending Packet #%d\n", i);
             sendPacket(i, send_delay); 
-            //send_delay += i;
+            send_delay += i;
         }
     } else {
         // output 0 as curr send rate for statistics
@@ -74,6 +88,11 @@ bool sender::tick( SST::Cycle_t currentCycle ) {
     return(false);
 }
 
+/**
+ * @brief 
+ * 
+ * @param ev 
+ */
 void sender::eventHandler(SST::Event *ev) {
     PacketEvent *pe = dynamic_cast<PacketEvent*>(ev);
     if ( pe != NULL ) {
@@ -96,9 +115,15 @@ void sender::eventHandler(SST::Event *ev) {
                 //drop_counter++;
         }
     }
-    delete ev;
+    delete ev; // Delete event to avoid memory leaks.
 }
 
+/**
+ * @brief Creates a packet to be sent over to the receiver.
+ * 
+ * @param id Packet ID.
+ * @param delay Send delay for the packet.
+ */
 void sender::sendPacket(int id, int delay) {
     PacketType type = PACKET;
     Packet packet = { type, id, node_id};
