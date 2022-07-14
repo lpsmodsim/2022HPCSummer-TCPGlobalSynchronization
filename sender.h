@@ -46,7 +46,7 @@ private:
     void finish(); 
     inline void sendPacket(int id, int delay);  // Constructs and sends a packet via the port.
 
-    int send_rate_data[300];
+    int send_rate_data[600];
     int counter = 0;
     int drop_counter = 0;
     int rate_drop[1000];

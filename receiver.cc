@@ -64,7 +64,7 @@ bool receiver::tick( SST::Cycle_t currentCycle ) {
     //^^^std::cout << msgQueue.size() << std::endl;
     //^^^std::cout << packet_loss << std::endl;
     //^^^std::cout << link_utilization * 100 << std::endl; 
-    std::cout << globsync_detect << std::endl;
+    //^^^std::cout << globsync_detect << std::endl;
 
     if (sampling_status == true && (getCurrentSimTimeMilli() >= sampling_start_time + window_size)) {
         output.verbose(CALL_INFO, 2, 0, "Ending Sampling^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
@@ -82,7 +82,7 @@ bool receiver::tick( SST::Cycle_t currentCycle ) {
         }
     }
 
-    if (currentCycle == 300) {
+    if (currentCycle == 600) {
         primaryComponentOKToEndSim();
         return(true);
     }

@@ -33,7 +33,7 @@ sender::~sender() {
 }
 
 void sender::finish() {
-    /**for (int i = 0; i < 300; i++) {
+    /**for (int i = 0; i < 600; i++) {
         std::cout << send_rate_data[i] << std::endl;
     }*/
     /**for (int i = 0; i < drop_counter; i++) {

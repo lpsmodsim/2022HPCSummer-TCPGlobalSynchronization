@@ -68,14 +68,14 @@ Potential metrics included the following:\newline
 	Average aggregate link utilization was chosen as a unique pattern forms in the link utilization when global synchronization happens. Due to clients syncing and lowering transmission rates all at once, the link can rest for a bit and clear up its queue and will process messages under its capacity, lowering link utilization. As transmission rates increase, link utilization will grow to 100\% and this cycle will repeat when packet loss occurs again.\newline
 	
 	\begin{figure}[H]
-	\caption{SST Model collected data of aggregate link utilization over 800 seconds.}
 	\centering
 	\includegraphics[scale=0.5]{linkutil}
+	\caption{SST Model collected data of aggregate link utilization over 800 seconds.}
 	\end{figure}
 	
 	\indent However, this metric was thrown out when I researched RED (Random Early Detection) which is a packet dropping policy in reliable networks that attempts to avoid global synchronization. Average aggregate link utilization under this dropping mechanism appears to be similar to tail drop except the average is closer to peak utilization. In this case using this metric may alert on false positives since its based on measuring where the mean utilization is compared to the peak utilization. \newline
 	
-																			(Cited image of RED with its average link utilization)
+																			\{ Image of RED with its average link utilization \}\newline
 	
 	The queue size fluctuates quite often during global synchronization as it will empty out more often during lower link utilization while it will grow during peak link utilization. I thought it would be possible to measure in a window the time span in which the queue size is emptied out and growing to max capacity and seeing if that span of time matches the duration between two transmission rate limits of a client.\newline
 	(Potential picture)\newline
@@ -83,25 +83,36 @@ Potential metrics included the following:\newline
 	However, during periods of low latency and high link utilization, the queue will be fluctuating drastically. This is because the link is in a stable state where it is clearing its queue as it fill. Therefore this metric could produce false positives and was tossed out.\newline
 	
 	Measuring the number of clients that limit their transmission rate in a window of time appears to be the most accurate and precise measurement for detecting this problem. Global Synchronization occurs because the clients are synchronized, measuring the times they limit transmissions can determine if they are showing synchronous behavior.\newline
-																{Include figure of stable state to failure after third client introduction}
-																
+																	
 	To measure this behavior, a node will monitor the clients connected to the link. When the monitor node detects that a client is limiting its transmission rate, the monitor will being sampling input for a window of time. If all nodes limit their transmission rate in the window, the possibility of global synchronization occurring increases and a (arbitrary (uh oh)) percentage of chance is added to a variable keeping track of the metric. To determine a high chance that this behavior is occurring, the monitor will sample multiple times when it detects a client limiting its transmission rate.\newline
 	This metric is demonstrated on three simulations which simulate three different scenarios of network traffic.\newline
 	
 	The first simulation is of three clients that send at a maximum rate that is under the links capacity. The link's queue will not fill so packet loss will not occur, and clients will not limit their transmission rates.\newline
-																			{ Figures of network traffic with no problem }
-																			{ Figures of network traffic with random send delays }
-	The following simulation models two clients sending packets to a receiver at a steady state which leads to low latency and high link utilization. A third client is introduced and disrupts this by sending packets which causes the queue to fill and packets to be dropped. All clients send packages simultaneously so they all encounter packet loss and limit their rates at about the same time. This creates the problem of global synchronization as they attempt to increase their transmission rates over time.\newline
 	\begin{figure}[H]
-		\caption{Transmission rates of the three senders over time.}
 		\centering
-		\includegraphics[scale=0.5]{bad-rate}
+		\includegraphics[scale=0.55]{good-rate}
+		\caption{Transmission rates of the three senders over time.}
 	\end{figure}
 
 	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.55]{good-metric}
 		\caption{Metric detecting the existence of the problem in the simulation.}
+	\end{figure}
+	
+																			\{ Figures of network traffic with random send delays \}\newline
+																			
+	The third simulation models two clients sending packets to a link a rate in which the queue does not fill up so packet loss does not occur. A third client is introduced and disrupts this by sending packets which causes the queue to fill and packets to be dropped. All clients send packages simultaneously so they all encounter packet loss and limit their rates at about the same time. This creates the problem of global synchronization as they attempt to increase their transmission rates over time.\newline
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.5]{bad-rate}
+		\caption{Transmission rates of the three senders over time.}
+	\end{figure}
+
+	\begin{figure}[H]
 		\centering
 		\includegraphics[scale=0.5]{bad-metric}
+		\caption{Metric detecting the existence of the problem in the simulation.}
 	\end{figure}
 
 \begin{thebibliography}{9}
